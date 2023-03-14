@@ -77,6 +77,9 @@ public class Bench implements Serializable {
 	
 	@Column(unique = false, nullable = false)
 	private String created_by;
+	
+	@Column(unique = false, nullable = false)
+	private String resume;
 
 	@Temporal(TemporalType.TIMESTAMP)
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
@@ -96,7 +99,7 @@ public class Bench implements Serializable {
 	public Bench(Long bench_id, long partner_id, String name, String contact, String alternate_contact, String email,
 			String alternate_email, Double exp, String domain, String bench_type, String primary_skill,
 			String secondary_skill, double budget, double salary, String org_name, String org_url, String current_role,
-			String qualification, String created_by, Date dt, int status) {
+			String qualification, String created_by,String resume, Date dt, int status) {
 		super();
 		this.bench_id = bench_id;
 		this.partner_id = partner_id;
@@ -117,7 +120,7 @@ public class Bench implements Serializable {
 		this.current_role = current_role;
 		this.qualification = qualification;
 		this.created_by = created_by;
-		this.dt = dt;
+		this.resume=resume;
 		this.status = status;
 	}
 
@@ -281,6 +284,19 @@ public class Bench implements Serializable {
 		this.created_by = created_by;
 	}
 
+	
+
+
+	public String getResume() {
+		return resume;
+	}
+
+
+
+	public void setResume(String resume) {
+		this.resume = resume;
+	}
+
 
 
 	public Date getDt() {
@@ -320,8 +336,13 @@ public class Bench implements Serializable {
 				+ alternate_email + ", exp=" + exp + ", domain=" + domain + ", bench_type=" + bench_type
 				+ ", primary_skill=" + primary_skill + ", secondary_skill=" + secondary_skill + ", budget=" + budget
 				+ ", salary=" + salary + ", org_name=" + org_name + ", org_url=" + org_url + ", current_role="
-				+ current_role + ", qualification=" + qualification + ", created_by=" + created_by + ", dt=" + dt + ", status=" + status + "]";
+				+ current_role + ", qualification=" + qualification + ", created_by=" + created_by + ", resume="
+				+ resume + ", dt=" + dt + ", status=" + status + "]";
 	}
+
+
+
+	
 
 	
 

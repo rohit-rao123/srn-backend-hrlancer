@@ -1,5 +1,7 @@
 package org.srn.web.Recruiter.service_impl;
 
+import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -12,11 +14,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import org.srn.web.Recruiter.Configuration.filters.MSRequestFilter;
 import org.srn.web.Recruiter.constant.VMessageConstant;
 import org.srn.web.Recruiter.dao_impl.Bench_dao_impl;
 import org.srn.web.Recruiter.dto.ResponseDto;
 import org.srn.web.Recruiter.entity.Bench;
+import org.srn.web.Recruiter.entity.Company;
+import org.srn.web.Recruiter.entity.Profiles;
 import org.srn.web.Recruiter.service.BenchService;
 
 @Service
@@ -28,18 +33,58 @@ public class BenchServiceImpl implements BenchService {
 
 	@Autowired
 	private MSRequestFilter msRequestFilter;
+	
+	public final String UPLOAD_DIR = "/home/ubuntu/app/internal/dev/recruiter-app/disk/upload_files/bench/";
+	
+	//public final String UPLOAD_DIR = "E:\\SRN-PROJECT-MAIN-NEW\\Latest-Recruiter-code\\bench\\";
+
+	public boolean uploadFile(MultipartFile fileInput) {
+		boolean f = false;
+		try {
+			if (Profile_Service_Impl.checkFileFormat(fileInput) == false) {
+				return false;
+			} else {
+				InputStream fIS = fileInput.getInputStream();
+				byte[] datafile = new byte[fIS.available()];
+				fIS.read(datafile);
+
+				FileOutputStream fOS = new FileOutputStream(UPLOAD_DIR + fileInput.getOriginalFilename());
+				fOS.write(datafile);
+				fOS.close();
+				f = true;
+				return f;
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			return f;
+		}
+
+	}
+
+	public static boolean checkFileFormat(MultipartFile file) {
+
+		String fileContentType = file.getContentType();
+		if (fileContentType.equals("application/vnd.openxmlformats-officedocument.wordprocessingml.document")) {
+			return true;
+		} else if (fileContentType.equals("application/pdf")) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
 
 	@Override
 	public ResponseEntity<ResponseDto> addNewBench(HttpSession session, String token,String name,
 			String contact, String alternateContact, String email, String alternateEmail, String xp, String domain, String bench_type,
-			String primarySkill, String secondarySkill,String budget,String salary,String org_name,String org_url, String currentRole, String qualification) {
+			String primarySkill, String secondarySkill,String budget,String salary,String org_name,String org_url, String currentRole, String qualification,MultipartFile resume) {
 		// TODO Auto-generated method stub
+		msRequestFilter.validateToken(session, token);
 		ResponseDto response = new ResponseDto();
 
-		msRequestFilter.validateToken(session, token);
 		try {
 			if (session.getAttribute("isSession") != "true") {
-
+				System.out.println(session.getAttribute("isSession"));
 				response.setMessage("Please login!");
 				response.setBody(null);
 				response.setStatus(false);
@@ -52,141 +97,135 @@ public class BenchServiceImpl implements BenchService {
 			response.setStatus(false);
 			return new ResponseEntity<ResponseDto>(response, HttpStatus.OK);
 		}
+			//	long client_id = 0;
+		double exp = 0;
+		double budgetes = 0;
+		double salaries = 0;
+		//int status = 0;
+		//Date benchStartDtDate = null;
+		//Date benchEndDtDate = null;
+		//SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
-		try {
-
-			
-
-			if (name == null || name.isEmpty()) {
+		
+		 if (name == null || name.isEmpty()) {
 				response.setMessage("Name is mandatory!");
 				response.setStatus(false);
 				return new ResponseEntity<ResponseDto>(response, HttpStatus.OK);
 			}
 
-			if (contact == null || contact.isEmpty()) {
+			else if (contact == null || contact.isEmpty()) {
 				response.setMessage("Contact is mandatory!");
 				response.setStatus(false);
 				return new ResponseEntity<ResponseDto>(response, HttpStatus.OK);
 			}
 
-			if (email == null || email.isEmpty()) {
+			else if (email == null || email.isEmpty()) {
 				response.setMessage("Email is mandatory!");
 				response.setStatus(false);
 				return new ResponseEntity<ResponseDto>(response, HttpStatus.OK);
 			}
 
-			if (xp == null || xp.isEmpty()) {
+			else if (xp == null || xp.isEmpty()) {
 				response.setMessage("Experience is mandatory!");
 				response.setStatus(false);
 				return new ResponseEntity<ResponseDto>(response, HttpStatus.OK);
 			}
 
-			if (domain == null || domain.isEmpty()) {
+			else if (domain == null || domain.isEmpty()) {
 				response.setMessage("Domain is mandatory!");
 				response.setStatus(false);
 				return new ResponseEntity<ResponseDto>(response, HttpStatus.OK);
 			}
 			
-			if (bench_type == null || bench_type.isEmpty()) {
+			else if (bench_type == null || bench_type.isEmpty()) {
 				response.setMessage("Bench Type is mandatory!");
 				response.setStatus(false);
 				return new ResponseEntity<ResponseDto>(response, HttpStatus.OK);
 			}
 
-			if (primarySkill == null || primarySkill.isEmpty()) {
+			else if (primarySkill == null || primarySkill.isEmpty()) {
 				response.setMessage("Primary skill is mandatory!");
 				response.setStatus(false);
 				return new ResponseEntity<ResponseDto>(response, HttpStatus.OK);
 			}
-			if (secondarySkill == null || secondarySkill.isEmpty()) {
+			else if (secondarySkill == null || secondarySkill.isEmpty()) {
 				response.setMessage("Secondary skill is mandatory!");
 				response.setStatus(false);
 				return new ResponseEntity<ResponseDto>(response, HttpStatus.OK);
 			}
-			if (budget == null || budget.isEmpty()) {
+			else if (budget == null || budget.isEmpty()) {
 				response.setMessage("Budget is mandatory!");
 				response.setStatus(false);
 				return new ResponseEntity<ResponseDto>(response, HttpStatus.OK);
 			}
-			if (salary == null || salary.isEmpty()) {
+			else if (salary == null || salary.isEmpty()) {
 				response.setMessage("Salary is mandatory!");
 				response.setStatus(false);
 				return new ResponseEntity<ResponseDto>(response, HttpStatus.OK);
 			}
-			if (org_name == null || org_name.isEmpty()) {
+			else if (org_name == null || org_name.isEmpty()) {
 				response.setMessage("Org Name is mandatory!");
 				response.setStatus(false);
 				return new ResponseEntity<ResponseDto>(response, HttpStatus.OK);
 			}
-			if (org_url == null || org_url.isEmpty()) {
+			else if (org_url == null || org_url.isEmpty()) {
 				response.setMessage("Org Url is mandatory!");
 				response.setStatus(false);
 				return new ResponseEntity<ResponseDto>(response, HttpStatus.OK);
 			}
-			if (currentRole == null || currentRole.isEmpty()) {
+			else if (currentRole == null || currentRole.isEmpty()) {
 				response.setMessage("Current role is mandatory!");
 				response.setStatus(false);
 				return new ResponseEntity<ResponseDto>(response, HttpStatus.OK);
 			}
 
-			if (qualification == null || qualification.isEmpty()) {
+			else if (qualification == null || qualification.isEmpty()) {
 				response.setMessage("Qualification is mandatory!");
 				response.setStatus(false);
 				return new ResponseEntity<ResponseDto>(response, HttpStatus.OK);
 			}
-
-			
-		} catch (Exception e) {
-			// TODO: handle exception
-			e.printStackTrace();
-			response.setMessage("Internal server error !");
+			else if (resume == null) {
 			response.setStatus(false);
-			return new ResponseEntity<ResponseDto>(response, HttpStatus.OK);
-		}
-
-		long client_id = 0;
-		double exp = 0;
-		double budgetes = 0;
-		double salaries = 0;
-		int status = 0;
-		Date benchStartDtDate = null;
-		Date benchEndDtDate = null;
-		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-
-		try {
-			exp = Double.parseDouble(xp);
-		} catch (Exception e) {
-			e.printStackTrace();
-			response.setMessage("Enter valid  exprience !");
+			response.setMessage("resume file is mandatory");
 			response.setBody(null);
-			response.setStatus(false);
 			return new ResponseEntity<ResponseDto>(response, HttpStatus.OK);
+		} else {
+			if (uploadFile(resume) == true) {
+				String resumeName = resume.getOriginalFilename();
+				//System.out.println(resumeName);
+				
+				try {
+					exp = Double.parseDouble(xp);
+				} catch (Exception e) {
+					e.printStackTrace();
+					response.setMessage("Enter valid  exprience !");
+					response.setBody(null);
+					response.setStatus(false);
+					return new ResponseEntity<ResponseDto>(response, HttpStatus.OK);
 
-		}
-		try {
-			budgetes = Double.parseDouble(budget);
-		} catch (Exception e) {
-			e.printStackTrace();
-			response.setMessage("Enter valid  budget !");
-			response.setBody(null);
-			response.setStatus(false);
-			return new ResponseEntity<ResponseDto>(response, HttpStatus.OK);
+				}
+				try {
+					budgetes = Double.parseDouble(budget);
+				} catch (Exception e) {
+					e.printStackTrace();
+					response.setMessage("Enter valid  budget !");
+					response.setBody(null);
+					response.setStatus(false);
+					return new ResponseEntity<ResponseDto>(response, HttpStatus.OK);
 
-		}
-		try {
-			salaries = Double.parseDouble(salary);
-		} catch (Exception e) {
-			e.printStackTrace();
-			response.setMessage("Enter valid  salary !");
-			response.setBody(null);
-			response.setStatus(false);
-			return new ResponseEntity<ResponseDto>(response, HttpStatus.OK);
+				}
+				try {
+					salaries = Double.parseDouble(salary);
+				} catch (Exception e) {
+					e.printStackTrace();
+					response.setMessage("Enter valid  salary !");
+					response.setBody(null);
+					response.setStatus(false);
+					return new ResponseEntity<ResponseDto>(response, HttpStatus.OK);
 
-		}
-		
-		try {
-			// Create new bench and set its properties
-			//long partner_id = (long) session.getAttribute("partner_id");
+				}
+				
+
 			Bench bench = new Bench();
 			bench.setPartner_id((long) session.getAttribute("partner_id"));
 			bench.setName(name);
@@ -206,32 +245,39 @@ public class BenchServiceImpl implements BenchService {
 			bench.setCurrent_role(currentRole);
 			bench.setQualification(qualification);
 			bench.setCreated_by((String) session.getAttribute("email"));
+			bench.setResume(resumeName);
 			bench.setDt(new Date());
 			bench.setStatus(1);
-			
-			// Save bench to the database
-			boolean result = bench_repos.saveBench(bench);
+			List<Bench> localList = bench_repos.getByContact(session, contact);
+				if (localList.isEmpty() || localList == null) {
+					boolean result = bench_repos.saveBench(bench);
+					if (result == true) {
+						response.setStatus(true);
+						response.setMessage("new bench is created for " + name);
+						response.setBody(bench);
+						return new ResponseEntity<ResponseDto>(response, HttpStatus.OK);
+					} else {
+						response.setStatus(false);
+						response.setMessage("new bench cannot be created");
+						response.setBody("Internal server error occured");
+						return new ResponseEntity<ResponseDto>(response, HttpStatus.OK);
+					}
 
-			// Return response based on the result of the save operation
-			if (result) {
-				response.setMessage("Bench saved successfully");
-				response.setBody(bench);
-				response.setStatus(true);
-				return new ResponseEntity<ResponseDto>(response, HttpStatus.OK);
+				} else {
+					response.setStatus(false);
+					response.setMessage("bench already exist");
+					response.setBody(null);
+					return new ResponseEntity<ResponseDto>(response, HttpStatus.OK);
+				}
+
 			} else {
-				response.setMessage("New bench could not be created");
-				response.setBody(null);
 				response.setStatus(false);
-				return new ResponseEntity<ResponseDto>(response, HttpStatus.INTERNAL_SERVER_ERROR);
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-			response.setMessage("Internal server error");
-			response.setBody(null);
-			response.setStatus(false);
-			return new ResponseEntity<ResponseDto>(response, HttpStatus.OK);
-		}
+				response.setMessage("please check resume file format ");
+				response.setBody(null);
+				return new ResponseEntity<ResponseDto>(response, HttpStatus.OK);
 
+			}
+		}
 	}
 
 	@Override
