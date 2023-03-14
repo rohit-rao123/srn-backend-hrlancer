@@ -1,0 +1,3 @@
+"job_id","client_id","domain","job_role","skills","jd","min_yr_exp","max_yr_exp","max_yr_budget","qualification","location"," job_type","working_mode","head_count"," hired_count","open","created_by","dt","status"
+"1","101","java developer","java application developer","-","-","1.0","3.0","60000.0","B.E.","REMOTE","C2C","WFH","200","10","0","pankaj.sharma@sroniyan.com","2022-10-28 11:51:50","1"
+"2","101","Java","java_developer","-","-","0.0","3.0","70000.0","B.Tech","REMOTE","C2C","WFH","100","20","0","-","2022-11-05 10:18:15","1"
