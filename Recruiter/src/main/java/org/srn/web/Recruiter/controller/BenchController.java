@@ -13,8 +13,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.srn.web.Recruiter.Configuration.filters.MSRequestFilter;
+import org.srn.web.Recruiter.component.ExcelHelper;
 import org.srn.web.Recruiter.dto.ResponseDto;
 import org.srn.web.Recruiter.service.BenchService;
+import org.srn.web.Recruiter.service_impl.ExcelService;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -44,6 +46,10 @@ public class BenchController {
 	
 	@Autowired
 	private MSRequestFilter msRequestFilter;
+	
+	@Autowired
+	 private ExcelService fileService;
+
 
 	@PostMapping("/addBench")
 	@ApiOperation(value = "Add a new bench", notes = "This API adds a new bench.")
@@ -55,6 +61,7 @@ public class BenchController {
 			@ApiResponse(code = 500, message = "Internal server error") })
 	public ResponseEntity<ResponseDto> addBench(HttpSession session, @RequestHeader("Authorization") String token,
 			@ApiParam(value = "Name", required = false) @RequestParam(required = false, defaultValue = "") String name,
+			@ApiParam(value = "PartnerId", required = false) @RequestParam(required = false, defaultValue = "0") long partner_id,
 			@ApiParam(value = "Contact", required = false) @RequestParam(required = false, defaultValue = "") String contact,
 			@ApiParam(value = "Alternate contact", required = false) @RequestParam(required = false, defaultValue = "") String alternate_contact,
 			@ApiParam(value = "Email", required = false) @RequestParam(required = false, defaultValue = "") String email,
@@ -70,11 +77,14 @@ public class BenchController {
 			@ApiParam(value = "ORG_URL", required = false) @RequestParam(required = false, defaultValue = "") String org_url,
 			@ApiParam(value = "Current Role", required = false) @RequestParam(required = false, defaultValue = "") String current_role,
 			@ApiParam(value = "Qualification", required = false) @RequestParam(required = false, defaultValue = "") String qualification,
+			@ApiParam(value = "Location", required = false) @RequestParam(required = false, defaultValue = "") String location,
+			@ApiParam(value = "is_shift_flexibility", required = false) @RequestParam(required = false, defaultValue = "") String is_shift_flexibility,
+			@ApiParam(value = "working_mode", required = false) @RequestParam(required = false, defaultValue = "") String working_mode,
 			@ApiParam(value = "Browse resume", required = false) @RequestParam(required = false,value ="file") MultipartFile resume) {
 
 		// Call service method to add bench
-		return benchService.addNewBench(session, token, name, contact, alternate_contact, email,
-				alternate_email, exp, domain,bench_type, primary_skill, secondary_skill, budget,salary,org_name,org_url,current_role, qualification,resume);
+		return benchService.addNewBench(session, token,partner_id, name, contact, alternate_contact, email,
+				alternate_email, exp, domain,bench_type, primary_skill, secondary_skill, budget,salary,org_name,org_url,current_role, qualification,is_shift_flexibility,location,working_mode,resume);
 	}
 
 	@GetMapping("/search/Bench")
@@ -87,6 +97,7 @@ public class BenchController {
 			@ApiResponse(code = 500, message = "Internal server error") })
 	public ResponseEntity<ResponseDto> searchBench(HttpSession session, @RequestHeader("Authorization") String token,
 			@RequestParam(required = false, defaultValue = "") String bench_id,
+			@RequestParam(required = false, defaultValue = "") String partner_id,
 			@RequestParam(required = false, defaultValue = "") String name,
 			@RequestParam(required = false, defaultValue = "") String contact,
 			//@RequestParam(required = false, defaultValue = "") String alternate_contact,
@@ -102,12 +113,15 @@ public class BenchController {
 			@RequestParam(required = false, defaultValue = "") String org_name,
 			@RequestParam(required = false, defaultValue = "") String org_url,
 			@RequestParam(required = false, defaultValue = "") String current_role,
-			@RequestParam(required = false, defaultValue = "") String qualification) {
+			@RequestParam(required = false, defaultValue = "") String qualification,
+			@RequestParam(required = false, defaultValue = "") String is_shift_flexibility,
+			@RequestParam(required = false, defaultValue = "") String location,
+			@RequestParam(required = false, defaultValue = "") String working_mode) {
 
 		// Call a service method to search for bench resources with the given parameters
-		return benchService.searchBench(session, token, bench_id,name, contact,
+		return benchService.searchBench(session, token, bench_id,partner_id,name, contact,
 				 email, exp, domain, bench_type, primary_skill, secondary_skill, budget,salary,org_name,org_url,
-				current_role, qualification);
+				current_role, qualification,is_shift_flexibility,location,working_mode);
 	}
 	
 	
@@ -155,6 +169,7 @@ public class BenchController {
 //				System.out.println(file.getName());
 //				HttpHeaders headers = new HttpHeaders();
 //				headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+//				headers.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + filename.replace(" ", "_"));
 //				headers.setContentDisposition(ContentDisposition.attachment().filename(Filename).build());
 //
 //				return new ResponseEntity<>(contents, headers, HttpStatus.OK);
@@ -188,6 +203,47 @@ public class BenchController {
 //		}
 //
 //	}
+
+//	@PostMapping(value=("/benchExcelFile"),produces = "application/json", consumes = "multipart/form-data")
+//	@ApiOperation(value = "rule set file upload services", notes = "This api to checking the rule set file uploading.")
+//	public ResponseEntity<ResponseDto> uploadFile(HttpSession session, @RequestHeader("Authorization") String token, @RequestParam("file") MultipartFile file) {
+//		msRequestFilter.validateToken(session, token);
+//		try {
+//			if (session.getAttribute("isSession") != "true") {
+//				System.out.println(session.getAttribute("isSession"));
+//				return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+//			}
+//		} catch (Exception e) {
+//
+//			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+//		}
+//
+//		ResponseDto response = new ResponseDto();
+//		String message = "";
+//	    if (ExcelHelper.hasExcelFormat(file)) {
+//	      try {
+//	        fileService.saveRuleSets(file);
+//	        System.out.println(file);
+//
+//	       message = "Uploaded the file successfully: " + file.getOriginalFilename();
+//	       	response.setMessage(message);
+//	       	response.setStatus(true);
+//	       	
+//	        return new ResponseEntity<ResponseDto>(response,HttpStatus.OK);
+//	        
+//	        } catch (Exception e) {
+//	        	System.out.println(e);
+//	        message = "Could not upload the file: " + file.getOriginalFilename() + "!";
+//	        response.setMessage(message);
+//	       	return new ResponseEntity<ResponseDto>(response,HttpStatus.EXPECTATION_FAILED);
+//	      }
+//	    }
+//
+//	    message = "Please upload an excel file!";
+//	    response.setMessage(message);
+//       	response.setStatus(false);
+//	    return new ResponseEntity<ResponseDto>(response,HttpStatus.BAD_REQUEST);
+//	  }
 
 
 }

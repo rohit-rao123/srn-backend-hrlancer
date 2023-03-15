@@ -2,12 +2,17 @@ package org.srn.web.Recruiter.entity;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+
+import org.srn.web.Recruiter.entity.Jobs.JobType;
+import org.srn.web.Recruiter.entity.Jobs.WorkingMode;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
@@ -79,8 +84,38 @@ public class Bench implements Serializable {
 	private String created_by;
 	
 	@Column(unique = false, nullable = false)
+	private long is_shift_flexibility;
+	
+	
+	public enum WorkingMode{
+		WFH, WFO, REMOTE, HYBRID	
+		}
+	
+	@Enumerated(EnumType.STRING)
+	@Column( name ="working_mode",columnDefinition ="ENUM('WFH', 'WFO', 'REMOTE', 'HYBRID')", nullable = false)
+	private WorkingMode working_mode;
+	
+	@Column(unique = false, nullable = false)
+	private String location;
+	
+	
+	@Column(unique = false, nullable = false)
 	private String resume;
 
+	@Temporal(TemporalType.DATE)
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+	@Column(unique = true, nullable = true)
+	private Date bench_start_dt;
+
+	@Temporal(TemporalType.DATE)
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+	@Column(unique = true, nullable = true)
+	private Date bench_end_dt;
+
+	@Column(unique = true, nullable = true)
+	private String bench_status;
+
+	
 	@Temporal(TemporalType.TIMESTAMP)
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
 	@Column(unique = false, nullable = false)
@@ -89,17 +124,17 @@ public class Bench implements Serializable {
 	@Column(unique = false, nullable = false)
 	private int status;
 
-
+	
 	public Bench() {
 		super();
 	}
 
 	
-	
 	public Bench(Long bench_id, long partner_id, String name, String contact, String alternate_contact, String email,
 			String alternate_email, Double exp, String domain, String bench_type, String primary_skill,
 			String secondary_skill, double budget, double salary, String org_name, String org_url, String current_role,
-			String qualification, String created_by,String resume, Date dt, int status) {
+			String qualification, String created_by, long is_shift_flexibility, WorkingMode working_mode, String location, String resume, Date bench_start_dt, Date bench_end_dt,
+			String bench_status, Date dt, int status) {
 		super();
 		this.bench_id = bench_id;
 		this.partner_id = partner_id;
@@ -120,11 +155,16 @@ public class Bench implements Serializable {
 		this.current_role = current_role;
 		this.qualification = qualification;
 		this.created_by = created_by;
-		this.resume=resume;
+		this.is_shift_flexibility = is_shift_flexibility;
+		this.working_mode = working_mode;
+		this.location = location;
+		this.resume = resume;
+		this.bench_start_dt = bench_start_dt;
+		this.bench_end_dt = bench_end_dt;
+		this.bench_status = bench_status;
+		this.dt = dt;
 		this.status = status;
 	}
-
-
 
 	public Long getBench_id() {
 		return bench_id;
@@ -272,8 +312,19 @@ public class Bench implements Serializable {
 	}
 
 	
+	
 
 	
+	public long getIs_shift_flexibility() {
+		return is_shift_flexibility;
+	}
+
+
+	public void setIs_shift_flexibility(long is_shift_flexibility) {
+		this.is_shift_flexibility = is_shift_flexibility;
+	}
+
+
 	public String getCreated_by() {
 		return created_by;
 	}
@@ -286,16 +337,53 @@ public class Bench implements Serializable {
 
 	
 
-
 	public String getResume() {
 		return resume;
 	}
-
-
-
 	public void setResume(String resume) {
 		this.resume = resume;
 	}
+
+	public Date getBench_start_dt() {
+		return bench_start_dt;
+	}
+
+	public void setBench_start_dt(Date bench_start_dt) {
+		this.bench_start_dt = bench_start_dt;
+	}
+	public Date getBench_end_dt() {
+		return bench_end_dt;
+	}
+
+
+
+
+
+
+	public void setBench_end_dt(Date bench_end_dt) {
+		this.bench_end_dt = bench_end_dt;
+	}
+
+
+
+
+
+
+	public String getBench_status() {
+		return bench_status;
+	}
+
+
+
+
+
+
+	public void setBench_status(String bench_status) {
+		this.bench_status = bench_status;
+	}
+
+
+
 
 
 
@@ -329,6 +417,30 @@ public class Bench implements Serializable {
 
 
 
+
+
+
+	
+	public WorkingMode getWorking_mode() {
+		return working_mode;
+	}
+
+
+	public void setWorking_mode(WorkingMode working_mode) {
+		this.working_mode = working_mode;
+	}
+
+
+	public String getLocation() {
+		return location;
+	}
+
+
+	public void setLocation(String location) {
+		this.location = location;
+	}
+
+
 	@Override
 	public String toString() {
 		return "Bench [bench_id=" + bench_id + ", partner_id=" + partner_id + ", name=" + name + ", contact=" + contact
@@ -336,9 +448,15 @@ public class Bench implements Serializable {
 				+ alternate_email + ", exp=" + exp + ", domain=" + domain + ", bench_type=" + bench_type
 				+ ", primary_skill=" + primary_skill + ", secondary_skill=" + secondary_skill + ", budget=" + budget
 				+ ", salary=" + salary + ", org_name=" + org_name + ", org_url=" + org_url + ", current_role="
-				+ current_role + ", qualification=" + qualification + ", created_by=" + created_by + ", resume="
-				+ resume + ", dt=" + dt + ", status=" + status + "]";
+				+ current_role + ", qualification=" + qualification + ", created_by=" + created_by
+				+ ", is_shift_flexibility=" + is_shift_flexibility + ", working_mode=" + working_mode + ", location="
+				+ location + ", resume=" + resume + ", bench_start_dt=" + bench_start_dt + ", bench_end_dt="
+				+ bench_end_dt + ", bench_status=" + bench_status + ", dt=" + dt + ", status=" + status + "]";
 	}
+
+
+	
+
 
 
 

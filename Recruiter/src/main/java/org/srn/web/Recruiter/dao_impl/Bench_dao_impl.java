@@ -59,6 +59,18 @@ public class Bench_dao_impl implements Bench_dao {
 		}
 	}
 
+	public List<Bench> getByPartnerId(HttpSession session, long partner_id) {
+		// TODO Auto-generated method stub
+		String query = "select * from bench as b where b.partner_id=:partner_id order by bench_id desc";
+		try {
+			List<Bench> list = sessionFactory.getCurrentSession().createNativeQuery(query)
+					.setParameter("partner_id", partner_id).addEntity(Bench.class).getResultList();
+			return list;
+		} catch (Exception e) {
+			return null;
+		}
+	}
+
 	public List<Bench> getByBenchName(HttpSession session, String name) {
 		// TODO Auto-generated method stub
 		String query = "select * from bench as b where b.name like :nme order by bench_id desc";
@@ -223,6 +235,43 @@ public class Bench_dao_impl implements Bench_dao {
 			return null;
 		}
 	}
+	
+	public List<Bench> getByLocation(HttpSession session, String location) {
+		// TODO Auto-generated method stub
+		String query = "select * from bench as b where b.location like :location order by bench_id desc";
+		try {
+			List<Bench> list = sessionFactory.getCurrentSession().createNativeQuery(query)
+					.setParameter("location", "%" + location + "%").addEntity(Bench.class).getResultList();
+			return list;
+		} catch (Exception e) {
+			return null;
+		}
+	}
+	
+	public List<Bench> getByIs_shift_flexibility(HttpSession session, long is_shift_flexibility) {
+		// TODO Auto-generated method stub
+		String query = "select * from bench as b where b.is_shift_flexibility like :is_shift_flexibility order by bench_id desc";
+		try {
+			List<Bench> list = sessionFactory.getCurrentSession().createNativeQuery(query)
+					.setParameter("is_shift_flexibility", "%" + is_shift_flexibility + "%").addEntity(Bench.class).getResultList();
+			return list;
+		} catch (Exception e) {
+			return null;
+		}
+	}
+	
+	public List<Bench> getByWorkingMode(HttpSession session, String working_mode) {
+		// TODO Auto-generated method stub
+		String query = "select * from bench as b where b.working_mode like :working_mode order by bench_id desc";
+		try {
+			List<Bench> list = sessionFactory.getCurrentSession().createNativeQuery(query)
+					.setParameter("working_mode", "%" + working_mode + "%").addEntity(Bench.class).getResultList();
+			return list;
+		} catch (Exception e) {
+			return null;
+		}
+	}
+	
 
 	public List<Bench> getByResume(HttpSession session, String resume) {
 		// TODO Auto-generated method stub
