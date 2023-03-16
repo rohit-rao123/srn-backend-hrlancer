@@ -2,7 +2,6 @@ package org.srn.web.Recruiter.service_impl;
 
 import java.io.FileOutputStream;
 import java.io.InputStream;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -33,9 +32,9 @@ public class BenchServiceImpl implements BenchService {
 	@Autowired
 	private MSRequestFilter msRequestFilter;
 	
-	//public final String UPLOAD_DIR = "/home/ubuntu/app/internal/dev/recruiter-app/disk/upload_files/bench/";
+	public final String UPLOAD_DIR = "/home/ubuntu/app/internal/dev/recruiter-app/disk/upload_files/bench/";
 	
-	public final String UPLOAD_DIR = "E:\\SRN-PROJECT-MAIN-NEW\\Latest-Recruiter-code\\bench\\";
+	//public final String UPLOAD_DIR = "E:\\SRN-PROJECT-MAIN-NEW\\Latest-Recruiter-code\\bench\\";
 
 	public boolean uploadFile(MultipartFile fileInput) {
 		boolean f = false;
@@ -79,7 +78,7 @@ public class BenchServiceImpl implements BenchService {
 	@Override
 	public ResponseEntity<ResponseDto> addNewBench(HttpSession session, String token,long partner_id,String name,
 			String contact, String alternateContact, String email, String alternateEmail, String xp, String domain, String bench_type,
-			String primarySkill, String secondarySkill,String budget,String salary,String org_name,String org_url, String currentRole, String qualification,String is_shift_flexibility,String location,String working_mode,MultipartFile resume) {
+			String primarySkill, String secondarySkill,String budget,String salary,String org_name,String org_url, String currentRole, String qualification,String is_shift_flexibility,String location,String working_mode,String notice_period,MultipartFile resume) {
 		// TODO Auto-generated method stub
 		msRequestFilter.validateToken(session, token);
 		ResponseDto response = new ResponseDto();
@@ -100,6 +99,7 @@ public class BenchServiceImpl implements BenchService {
 			return new ResponseEntity<ResponseDto>(response, HttpStatus.OK);
 		}
 		long isshiftflexibility = 0;
+		long noticeperiod = 0;
 		double exp = 0;
 		double budgetes = 0;
 		double salaries = 0;
@@ -202,6 +202,7 @@ public class BenchServiceImpl implements BenchService {
 				response.setStatus(false);
 				return new ResponseEntity<ResponseDto>(response, HttpStatus.OK);
 			}
+
 			if(partner_id == 0) {
 				
 				bench.setPartner_id((long) session.getAttribute("partner_id"));
@@ -221,7 +222,18 @@ public class BenchServiceImpl implements BenchService {
 					return new ResponseEntity<ResponseDto>(response, HttpStatus.OK);
 
 				}
-				
+
+				try {
+					noticeperiod = Long.parseLong(notice_period);
+				} catch (Exception e) {
+					e.printStackTrace();
+					response.setMessage("Enter valid notice period number !");
+					response.setBody(null);
+					response.setStatus(false);
+					return new ResponseEntity<ResponseDto>(response, HttpStatus.OK);
+
+				}
+
 				try {
 					exp = Double.parseDouble(xp);
 				} catch (Exception e) {
@@ -252,6 +264,28 @@ public class BenchServiceImpl implements BenchService {
 					return new ResponseEntity<ResponseDto>(response, HttpStatus.OK);
 
 				}
+//				try {
+//					benchStartDtDate = dateFormat.parse(benchStartDt);
+//				} catch (Exception e) {
+//					e.printStackTrace();
+//					response.setMessage("Enter valid Start Date!");
+//					response.setBody(null);
+//					response.setStatus(false);
+//					return new ResponseEntity<ResponseDto>(response, HttpStatus.OK);
+//
+//				}
+//
+//				try {
+//					benchEndDtDate = dateFormat.parse(benchEndDt);
+//				} catch (Exception e) {
+//					e.printStackTrace();
+//					response.setMessage("Enter valid End Date!");
+//					response.setBody(null);
+//					response.setStatus(false);
+//					return new ResponseEntity<ResponseDto>(response, HttpStatus.OK);
+//
+//				}
+
 				
 			//Bench bench = new Bench();
 			bench.setPartner_id((long) session.getAttribute("partner_id"));
@@ -273,19 +307,25 @@ public class BenchServiceImpl implements BenchService {
 			bench.setQualification(qualification);
 			bench.setLocation(location);
 			bench.setIs_shift_flexibility(isshiftflexibility);
-			if (WorkingMode.HYBRID.toString().contentEquals(working_mode)) {
-				bench.setWorking_mode(WorkingMode.HYBRID);
-			} else if (WorkingMode.REMOTE.toString().contentEquals(working_mode)) {
-				bench.setWorking_mode(WorkingMode.REMOTE);
+			if (WorkingMode.Hybrid.toString().contentEquals(working_mode)) {
+				bench.setWorking_mode(WorkingMode.Hybrid);
+			} else if (WorkingMode.Remote.toString().contentEquals(working_mode)) {
+				bench.setWorking_mode(WorkingMode.Remote);
 			} else if (WorkingMode.WFH.toString().contentEquals(working_mode)) {
 				bench.setWorking_mode(WorkingMode.WFH);
-			} else if (WorkingMode.WFO.toString().contentEquals(working_mode)) {
-				bench.setWorking_mode(WorkingMode.WFO);
+			} else if (WorkingMode.Onside.toString().contentEquals(working_mode)) {
+				bench.setWorking_mode(WorkingMode.Onside);
+			}else if (WorkingMode.Office.toString().contentEquals(working_mode)) {
+				bench.setWorking_mode(WorkingMode.Office);
 			} else {
 				bench.setWorking_mode(WorkingMode.WFH);
 			}
 			bench.setCreated_by((String) session.getAttribute("email"));
 			bench.setResume("NA");
+			bench.setBench_start_dt(new Date());
+			bench.setBench_end_dt(null);
+			bench.setBench_status("OPEN");
+			bench.setNotice_period(noticeperiod);
 			bench.setDt(new Date());
 			bench.setStatus(1);
 			List<Bench> localList = bench_repos.getByContact(session, contact);
@@ -327,6 +367,17 @@ public class BenchServiceImpl implements BenchService {
 						return new ResponseEntity<ResponseDto>(response, HttpStatus.OK);
 
 					}
+					try {
+						noticeperiod = Long.parseLong(notice_period);
+					} catch (Exception e) {
+						e.printStackTrace();
+						response.setMessage("Enter valid notice period number !");
+						response.setBody(null);
+						response.setStatus(false);
+						return new ResponseEntity<ResponseDto>(response, HttpStatus.OK);
+
+					}
+
 
 				try {
 					exp = Double.parseDouble(xp);
@@ -358,8 +409,6 @@ public class BenchServiceImpl implements BenchService {
 					return new ResponseEntity<ResponseDto>(response, HttpStatus.OK);
 
 				}
-				
-			//Bench bench = new Bench();
 			bench.setPartner_id((long) session.getAttribute("partner_id"));
 			bench.setName(name);
 			bench.setContact(contact);
@@ -379,19 +428,25 @@ public class BenchServiceImpl implements BenchService {
 			bench.setQualification(qualification);
 			bench.setLocation(location);
 			bench.setIs_shift_flexibility(isshiftflexibility);
-			if (WorkingMode.HYBRID.toString().contentEquals(working_mode)) {
-				bench.setWorking_mode(WorkingMode.HYBRID);
-			} else if (WorkingMode.REMOTE.toString().contentEquals(working_mode)) {
-				bench.setWorking_mode(WorkingMode.REMOTE);
+			if (WorkingMode.Hybrid.toString().contentEquals(working_mode)) {
+				bench.setWorking_mode(WorkingMode.Hybrid);
+			} else if (WorkingMode.Remote.toString().contentEquals(working_mode)) {
+				bench.setWorking_mode(WorkingMode.Remote);
 			} else if (WorkingMode.WFH.toString().contentEquals(working_mode)) {
 				bench.setWorking_mode(WorkingMode.WFH);
-			} else if (WorkingMode.WFO.toString().contentEquals(working_mode)) {
-				bench.setWorking_mode(WorkingMode.WFO);
+			} else if (WorkingMode.Onside.toString().contentEquals(working_mode)) {
+				bench.setWorking_mode(WorkingMode.Onside);
+			}else if (WorkingMode.Office.toString().contentEquals(working_mode)) {
+				bench.setWorking_mode(WorkingMode.Office);
 			} else {
 				bench.setWorking_mode(WorkingMode.WFH);
 			}
 			bench.setCreated_by((String) session.getAttribute("email"));
 			bench.setResume(resumeName);
+			bench.setBench_start_dt(new Date());
+			bench.setBench_end_dt(null);
+			bench.setBench_status("OPEN");
+			bench.setNotice_period(noticeperiod);
 			bench.setDt(new Date());
 			bench.setStatus(1);
 			List<Bench> localList = bench_repos.getByContact(session, contact);
@@ -430,8 +485,8 @@ public class BenchServiceImpl implements BenchService {
 
 	@Override	
 	public ResponseEntity<ResponseDto> searchBench(HttpSession session, String token, String benchId, String partner_id,
-			String name, String contact, String email, String xp, String domain, String bench_type, String primary_skill,
-			String secondary_skill,String budget,String salary,String org_name,String org_url, String current_role, String qualification,String is_shift_flexibility,String location, String working_mode) {
+			String name, String contact, String email, String min_exp,String max_exp, String domain, String bench_type, List<String> primary_skill,
+			String secondary_skill,String min_budget,String max_budget,String salary,String org_name,String org_url, String current_role, String qualification,String is_shift_flexibility,String location, String working_mode,String bench_start_dt) {
 		// TODO Auto-generated method stub
 		ResponseDto response = new ResponseDto();
 
@@ -451,11 +506,13 @@ public class BenchServiceImpl implements BenchService {
 			response.setBody(null);
 			response.setStatus(false);
 			return new ResponseEntity<ResponseDto>(response, HttpStatus.OK);
+			
 		}
+		
 		try {
-		if (!benchId.isBlank() && name.isBlank() && contact.isBlank() && email.isBlank() && partner_id.isBlank() 
-					&& xp.isBlank() && domain.isBlank() && bench_type.isBlank() && primary_skill.isBlank() && secondary_skill.isBlank()
-					&& budget.isBlank() && salary.isBlank() && org_name.isBlank() && org_url.isBlank() && current_role.isBlank() && qualification.isBlank() && is_shift_flexibility.isBlank()  && location.isBlank() && working_mode.isBlank()) {
+		if (!benchId.isBlank() && partner_id.isBlank() && name.isBlank() && contact.isBlank() && email.isBlank()  
+					&& min_exp.isBlank() && max_exp.isBlank() && domain.isBlank() && bench_type.isBlank() && primary_skill.isEmpty() && secondary_skill.isBlank()
+					&& min_budget.isBlank() && max_budget.isBlank() && salary.isBlank() && org_name.isBlank() && org_url.isBlank() && current_role.isBlank() && qualification.isBlank() && is_shift_flexibility.isBlank()  && location.isBlank() && working_mode.isBlank() && bench_start_dt.isBlank()) {
 				
 			long bench_id = 0;
 					try {
@@ -478,9 +535,9 @@ public class BenchServiceImpl implements BenchService {
 					response.setStatus(true);
 					return new ResponseEntity<ResponseDto>(response, HttpStatus.OK);
 				}
-			} else if (benchId.isBlank() && name.isBlank() && contact.isBlank() && email.isBlank() && !partner_id.isBlank()
-					&& xp.isBlank() && domain.isBlank() && bench_type.isBlank() && primary_skill.isBlank() && secondary_skill.isBlank()
-					&& budget.isBlank() && salary.isBlank() && org_name.isBlank() && org_url.isBlank() && current_role.isBlank() && qualification.isBlank() && is_shift_flexibility.isBlank()  && location.isBlank() && working_mode.isBlank()) {
+			} else if (benchId.isBlank() && !partner_id.isBlank() && name.isBlank() && contact.isBlank() && email.isBlank() 
+					&& min_exp.isBlank() && max_exp.isBlank() && domain.isBlank() && bench_type.isBlank() && primary_skill.isEmpty() && secondary_skill.isBlank()
+					&& min_budget.isBlank() && max_budget.isBlank() && salary.isBlank() && org_name.isBlank() && org_url.isBlank() && current_role.isBlank() && qualification.isBlank() && is_shift_flexibility.isBlank()  && location.isBlank() && working_mode.isBlank() && bench_start_dt.isBlank()) {
 				long partnerid = 0;
 				try {
 					partnerid = Long.parseLong(partner_id);
@@ -505,9 +562,9 @@ public class BenchServiceImpl implements BenchService {
 					return new ResponseEntity<ResponseDto>(response, HttpStatus.OK);
 				}
 
-			} else if (benchId.isBlank() && !name.isBlank() && contact.isBlank() && email.isBlank() && partner_id.isBlank()
-					&& xp.isBlank() && domain.isBlank() && bench_type.isBlank() && primary_skill.isBlank() && secondary_skill.isBlank()
-					&& budget.isBlank() && salary.isBlank() && org_name.isBlank() && org_url.isBlank() && current_role.isBlank() && qualification.isBlank() && is_shift_flexibility.isBlank()  && location.isBlank() && working_mode.isBlank()) {
+			} else if (benchId.isBlank() && partner_id.isBlank() && !name.isBlank() && contact.isBlank() && email.isBlank() 
+					&& min_exp.isBlank() && max_exp.isBlank() && bench_type.isBlank() && primary_skill.isEmpty() && secondary_skill.isBlank()
+					&& min_budget.isBlank() && max_budget.isBlank() && salary.isBlank() && org_name.isBlank() && org_url.isBlank() && current_role.isBlank() && qualification.isBlank() && is_shift_flexibility.isBlank()  && location.isBlank() && working_mode.isBlank() && bench_start_dt.isBlank()) {
 				list = bench_repos.getByBenchName(session, name);
 				if (list.isEmpty() || list == null) {
 					response.setMessage("Does not found !");
@@ -521,9 +578,9 @@ public class BenchServiceImpl implements BenchService {
 					return new ResponseEntity<ResponseDto>(response, HttpStatus.OK);
 				}
 
-			} else if (benchId.isBlank() && name.isBlank() && !contact.isBlank() && email.isBlank() && partner_id.isBlank()
-					&& xp.isBlank() && domain.isBlank() && bench_type.isBlank() && primary_skill.isBlank() && secondary_skill.isBlank()
-					&& budget.isBlank() && salary.isBlank() && org_name.isBlank() && org_url.isBlank() && current_role.isBlank() && qualification.isBlank() && is_shift_flexibility.isBlank()  && location.isBlank() && working_mode.isBlank()) {
+			} else if (benchId.isBlank() && partner_id.isBlank() && name.isBlank() && !contact.isBlank() && email.isBlank() 
+					&& min_exp.isBlank() && max_exp.isBlank() && domain.isBlank() && bench_type.isBlank() && primary_skill.isEmpty() && secondary_skill.isBlank()
+					&& min_budget.isBlank() && max_budget.isBlank() && salary.isBlank() && org_name.isBlank() && org_url.isBlank() && current_role.isBlank() && qualification.isBlank() && is_shift_flexibility.isBlank()  && location.isBlank() && working_mode.isBlank() && bench_start_dt.isBlank()) {
 				list = bench_repos.getByContact(session, contact);
 				if (list.isEmpty() || list == null) {
 					response.setMessage("Does not found !");
@@ -536,9 +593,9 @@ public class BenchServiceImpl implements BenchService {
 					response.setStatus(true);
 					return new ResponseEntity<ResponseDto>(response, HttpStatus.OK);
 				}
-			} else if (benchId.isBlank() && name.isBlank() && contact.isBlank() && !email.isBlank() && partner_id.isBlank()
-					&& xp.isBlank() && domain.isBlank() && bench_type.isBlank() && primary_skill.isBlank() && secondary_skill.isBlank()
-					&& budget.isBlank() && salary.isBlank() && org_name.isBlank() && org_url.isBlank() && current_role.isBlank() && qualification.isBlank() && is_shift_flexibility.isBlank()  && location.isBlank() && working_mode.isBlank()) {
+			} else if (benchId.isBlank() && partner_id.isBlank() && name.isBlank() && contact.isBlank() && !email.isBlank() 
+					&& min_exp.isBlank() && max_exp.isBlank() && domain.isBlank() && bench_type.isBlank() && primary_skill.isEmpty() && secondary_skill.isBlank()
+					&& min_budget.isBlank() && max_budget.isBlank() && salary.isBlank() && org_name.isBlank() && org_url.isBlank() && current_role.isBlank() && qualification.isBlank() && is_shift_flexibility.isBlank()  && location.isBlank() && working_mode.isBlank() && bench_start_dt.isBlank()) {
 				list = bench_repos.getByEmail(session, email);
 				if (list.isEmpty() || list == null) {
 					response.setMessage("Does not found !");
@@ -552,19 +609,22 @@ public class BenchServiceImpl implements BenchService {
 					return new ResponseEntity<ResponseDto>(response, HttpStatus.OK);
 				}
 
-			} else if (benchId.isBlank() && name.isBlank() && contact.isBlank() && email.isBlank() && partner_id.isBlank()
-					&& !xp.isBlank() && domain.isBlank() && bench_type.isBlank() && primary_skill.isBlank() && secondary_skill.isBlank()
-					&& budget.isBlank() && salary.isBlank() && org_name.isBlank() && org_url.isBlank() && current_role.isBlank() && qualification.isBlank() && is_shift_flexibility.isBlank()  && location.isBlank() && working_mode.isBlank()) {
-				double exp = 0;
+			} else if (benchId.isBlank() && partner_id.isBlank() && name.isBlank() && contact.isBlank() && email.isBlank() 
+					&& !min_exp.isBlank() && max_exp.isBlank() && domain.isBlank() && bench_type.isBlank() && primary_skill.isEmpty() && secondary_skill.isBlank()
+					&& min_budget.isBlank() && max_budget.isBlank() && salary.isBlank() && org_name.isBlank() && org_url.isBlank() && current_role.isBlank() && qualification.isBlank() && is_shift_flexibility.isBlank()  && location.isBlank() && working_mode.isBlank() && bench_start_dt.isBlank()) {
+				double minexp = 0;
+				
 				try {
-					exp = Double.parseDouble(xp);
+					minexp = Double.parseDouble(min_exp);
+					
 				} catch (Exception e) {
-					response.setMessage("Enter valid Exp !");
+					response.setMessage("Enter valid Min Exp !");
 					response.setBody(null);
 					response.setStatus(false);
 					return new ResponseEntity<ResponseDto>(response, HttpStatus.OK);
 				}
-				list = bench_repos.getByExp(session, exp);
+				
+				list = bench_repos.getByMinExp(session, minexp);
 				if (list.isEmpty() || list == null) {
 					response.setMessage("Does not found !");
 					response.setBody(null);
@@ -577,9 +637,34 @@ public class BenchServiceImpl implements BenchService {
 					return new ResponseEntity<ResponseDto>(response, HttpStatus.OK);
 				}
 
-			} else if (benchId.isBlank() && name.isBlank() && contact.isBlank() && email.isBlank() && partner_id.isBlank()
-					&& xp.isBlank() && !domain.isBlank() && bench_type.isBlank() && primary_skill.isBlank() && secondary_skill.isBlank()
-					&& budget.isBlank() && salary.isBlank() && org_name.isBlank() && org_url.isBlank() && current_role.isBlank() && qualification.isBlank() && is_shift_flexibility.isBlank()  && location.isBlank() && working_mode.isBlank()) {
+			} else if (benchId.isBlank() && partner_id.isBlank() && name.isBlank() && contact.isBlank() && email.isBlank() 
+					&& min_exp.isBlank() && !max_exp.isBlank() && domain.isBlank() && bench_type.isBlank() && primary_skill.isEmpty() && secondary_skill.isBlank()
+					&& min_budget.isBlank() && max_budget.isBlank() && salary.isBlank() && org_name.isBlank() && org_url.isBlank() && current_role.isBlank() && qualification.isBlank() && is_shift_flexibility.isBlank()  && location.isBlank() && working_mode.isBlank() && bench_start_dt.isBlank()) {
+				double maxexp = 0;
+				try {
+					maxexp = Double.parseDouble(max_exp);
+				} catch (Exception e) {
+					response.setMessage("Enter valid Max Exp !");
+					response.setBody(null);
+					response.setStatus(false);
+					return new ResponseEntity<ResponseDto>(response, HttpStatus.OK);
+				}
+				list = bench_repos.getByMaxExp(session, maxexp);
+				if (list.isEmpty() || list == null) {
+					response.setMessage("Does not found !");
+					response.setBody(null);
+					response.setStatus(false);
+					return new ResponseEntity<ResponseDto>(response, HttpStatus.OK);
+				} else {
+					response.setMessage("Searched  Bench !");
+					response.setBody(list);
+					response.setStatus(true);
+					return new ResponseEntity<ResponseDto>(response, HttpStatus.OK);
+				}
+
+			} else if (benchId.isBlank() && partner_id.isBlank() && name.isBlank() && contact.isBlank() && email.isBlank() 
+					&& min_exp.isBlank() && max_exp.isBlank() && !domain.isBlank() && bench_type.isBlank() && primary_skill.isEmpty() && secondary_skill.isBlank()
+					&& min_budget.isBlank() && max_budget.isBlank() && salary.isBlank() && org_name.isBlank() && org_url.isBlank() && current_role.isBlank() && qualification.isBlank() && is_shift_flexibility.isBlank()  && location.isBlank() && working_mode.isBlank() && bench_start_dt.isBlank()) {
 				list = bench_repos.getByDomain(session, domain);
 				if (list.isEmpty() || list == null) {
 					response.setMessage("Does not found !");
@@ -593,9 +678,9 @@ public class BenchServiceImpl implements BenchService {
 					return new ResponseEntity<ResponseDto>(response, HttpStatus.OK);
 				}
 
-			} else if (benchId.isBlank() && name.isBlank() && contact.isBlank() && email.isBlank() && partner_id.isBlank()
-					&& xp.isBlank() && domain.isBlank() && !bench_type.isBlank() && primary_skill.isBlank() && secondary_skill.isBlank()
-					&& budget.isBlank() && salary.isBlank() && org_name.isBlank() && org_url.isBlank() && current_role.isBlank() && qualification.isBlank() && is_shift_flexibility.isBlank()  && location.isBlank() && working_mode.isBlank()) {
+			} else if (benchId.isBlank() && partner_id.isBlank() && name.isBlank() && contact.isBlank() && email.isBlank() 
+					&& min_exp.isBlank() && max_exp.isBlank() && domain.isBlank() && !bench_type.isBlank() && primary_skill.isEmpty() && secondary_skill.isBlank()
+					&& min_budget.isBlank() && max_budget.isBlank() && salary.isBlank() && org_name.isBlank() && org_url.isBlank() && current_role.isBlank() && qualification.isBlank() && is_shift_flexibility.isBlank()  && location.isBlank() && working_mode.isBlank() && bench_start_dt.isBlank()) {
 				list = bench_repos.getByBenchType(session, bench_type);
 				if (list.isEmpty() || list == null) {
 					response.setMessage("Does not found !");
@@ -609,10 +694,12 @@ public class BenchServiceImpl implements BenchService {
 					return new ResponseEntity<ResponseDto>(response, HttpStatus.OK);
 				}
 
-			} else if (benchId.isBlank() && name.isBlank() && contact.isBlank() && email.isBlank() && partner_id.isBlank()
-					&& xp.isBlank() && domain.isBlank() && bench_type.isBlank() && !primary_skill.isBlank() && secondary_skill.isBlank()
-					&& budget.isBlank() && salary.isBlank() && org_name.isBlank() && org_url.isBlank() && current_role.isBlank() && qualification.isBlank() && is_shift_flexibility.isBlank()  && location.isBlank() && working_mode.isBlank()) {
-				list = bench_repos.getBypSkill(session, primary_skill);
+			} else if (benchId.isBlank() && partner_id.isBlank() && name.isBlank() && contact.isBlank() && email.isBlank() 
+					&& min_exp.isBlank() && max_exp.isBlank() && domain.isBlank() && bench_type.isBlank() && !primary_skill.isEmpty() && secondary_skill.isBlank()
+					&& min_budget.isBlank() && max_budget.isBlank() && salary.isBlank() && org_name.isBlank() && org_url.isBlank() && current_role.isBlank() && qualification.isBlank() && is_shift_flexibility.isBlank()  && location.isBlank() && working_mode.isBlank() && bench_start_dt.isBlank()) {
+				for(String primarh :primary_skill) {
+				list = bench_repos.getBypSkill(session, primarh);
+				}
 				if (list.isEmpty() || list == null) {
 					response.setMessage("Does not found !");
 					response.setBody(null);
@@ -624,10 +711,10 @@ public class BenchServiceImpl implements BenchService {
 					response.setStatus(true);
 					return new ResponseEntity<ResponseDto>(response, HttpStatus.OK);
 				}
-
-			} else if (benchId.isBlank() && name.isBlank() && contact.isBlank() && email.isBlank() && partner_id.isBlank()
-					&& xp.isBlank() && domain.isBlank() && bench_type.isBlank() && primary_skill.isBlank() && !secondary_skill.isBlank()
-					&& budget.isBlank() && salary.isBlank() && org_name.isBlank() && org_url.isBlank() && current_role.isBlank() && qualification.isBlank() && is_shift_flexibility.isBlank()  && location.isBlank() && working_mode.isBlank()) {
+				
+			} else if (benchId.isBlank() && partner_id.isBlank() && name.isBlank() && contact.isBlank() && email.isBlank() 
+					&& min_exp.isBlank() && max_exp.isBlank() && domain.isBlank() && bench_type.isBlank() && primary_skill.isEmpty() && !secondary_skill.isBlank()
+					&& min_budget.isBlank() && max_budget.isBlank() && salary.isBlank() && org_name.isBlank() && org_url.isBlank() && current_role.isBlank() && qualification.isBlank() && is_shift_flexibility.isBlank()  && location.isBlank() && working_mode.isBlank() && bench_start_dt.isBlank()) {
 				list = bench_repos.getBysSkill(session, secondary_skill);
 				if (list.isEmpty() || list == null) {
 					response.setMessage("Does not found !");
@@ -640,19 +727,19 @@ public class BenchServiceImpl implements BenchService {
 					response.setStatus(true);
 					return new ResponseEntity<ResponseDto>(response, HttpStatus.OK);
 				}
-			}else if (benchId.isBlank() && name.isBlank() && contact.isBlank() && email.isBlank() && partner_id.isBlank()
-					&& xp.isBlank() && domain.isBlank() && bench_type.isBlank() && primary_skill.isBlank() && secondary_skill.isBlank()
-					&& !budget.isBlank() && salary.isBlank() && org_name.isBlank() && org_url.isBlank() && current_role.isBlank() && qualification.isBlank() && is_shift_flexibility.isBlank()  && location.isBlank() && working_mode.isBlank()) {
-				double budgets = 0;
+			}else if (benchId.isBlank() && partner_id.isBlank() && name.isBlank() && contact.isBlank() && email.isBlank() 
+					&& min_exp.isBlank() && max_exp.isBlank() && domain.isBlank() && bench_type.isBlank() && primary_skill.isEmpty() && secondary_skill.isBlank()
+					&& !min_budget.isBlank() && max_budget.isBlank() && salary.isBlank() && org_name.isBlank() && org_url.isBlank() && current_role.isBlank() && qualification.isBlank() && is_shift_flexibility.isBlank()  && location.isBlank() && working_mode.isBlank() && bench_start_dt.isBlank()) {
+				double minbudgets = 0;
 				try {
-					budgets = Double.parseDouble(budget);
+					minbudgets = Double.parseDouble(min_budget);
 				} catch (Exception e) {
-					response.setMessage("Enter valid Budget !");
+					response.setMessage("Enter valid Min Budget !");
 					response.setBody(null);
 					response.setStatus(false);
 					return new ResponseEntity<ResponseDto>(response, HttpStatus.OK);
 				}
-				list = bench_repos.getByBudget(session, budgets);
+				list = bench_repos.getByMinBudget(session, minbudgets);
 				if (list == null || list.isEmpty()) {
 					response.setMessage("Does not found !");
 					response.setBody(null);
@@ -664,9 +751,34 @@ public class BenchServiceImpl implements BenchService {
 					response.setStatus(true);
 					return new ResponseEntity<ResponseDto>(response, HttpStatus.OK);
 				}
-			}else if (benchId.isBlank() && name.isBlank() && contact.isBlank() && email.isBlank() && partner_id.isBlank()
-					&& xp.isBlank() && domain.isBlank() && bench_type.isBlank() && primary_skill.isBlank() && secondary_skill.isBlank()
-					&& budget.isBlank() && !salary.isBlank() && org_name.isBlank() && org_url.isBlank() && current_role.isBlank() && qualification.isBlank() && is_shift_flexibility.isBlank()  && location.isBlank() && working_mode.isBlank()) {
+			}else if (benchId.isBlank() && partner_id.isBlank() && name.isBlank() && contact.isBlank() && email.isBlank() 
+					&& min_exp.isBlank() && max_exp.isBlank() && domain.isBlank() && bench_type.isBlank() && primary_skill.isEmpty() && secondary_skill.isBlank()
+					&& min_budget.isBlank() && !max_budget.isBlank() && salary.isBlank() && org_name.isBlank() && org_url.isBlank() && current_role.isBlank() && qualification.isBlank() && is_shift_flexibility.isBlank()  && location.isBlank() && working_mode.isBlank() && bench_start_dt.isBlank()) {
+				double maxbudgets = 0;
+				try {
+					maxbudgets = Double.parseDouble(max_budget);
+				} catch (Exception e) {
+					response.setMessage("Enter valid Max Budget !");
+					response.setBody(null);
+					response.setStatus(false);
+					return new ResponseEntity<ResponseDto>(response, HttpStatus.OK);
+				}
+				list = bench_repos.getByMaxBudget(session, maxbudgets);
+				if (list == null || list.isEmpty()) {
+					response.setMessage("Does not found !");
+					response.setBody(null);
+					response.setStatus(false);
+					return new ResponseEntity<ResponseDto>(response, HttpStatus.OK);
+				} else {
+					response.setMessage("Searched  Bench !");
+					response.setBody(list);
+					response.setStatus(true);
+					return new ResponseEntity<ResponseDto>(response, HttpStatus.OK);
+				}
+			}
+			else if (benchId.isBlank() && partner_id.isBlank() && name.isBlank() && contact.isBlank() && email.isBlank() 
+					&& min_exp.isBlank() && max_exp.isBlank() && domain.isBlank() && bench_type.isBlank() && primary_skill.isEmpty() && secondary_skill.isBlank()
+					&& min_budget.isBlank() && max_budget.isBlank()  && !salary.isBlank() && org_name.isBlank() && org_url.isBlank() && current_role.isBlank() && qualification.isBlank() && is_shift_flexibility.isBlank()  && location.isBlank() && working_mode.isBlank() && bench_start_dt.isBlank()) {
 				double salaries = 0;
 				try {
 					salaries = Double.parseDouble(salary);
@@ -688,9 +800,9 @@ public class BenchServiceImpl implements BenchService {
 					response.setStatus(true);
 					return new ResponseEntity<ResponseDto>(response, HttpStatus.OK);
 				}
-			} else if (benchId.isBlank() && name.isBlank() && contact.isBlank() && email.isBlank() && partner_id.isBlank()
-					&& xp.isBlank() && domain.isBlank() && bench_type.isBlank() && primary_skill.isBlank() && secondary_skill.isBlank()
-					&& budget.isBlank() && salary.isBlank() && !org_name.isBlank() && org_url.isBlank() && current_role.isBlank() && qualification.isBlank() && is_shift_flexibility.isBlank()  && location.isBlank() && working_mode.isBlank()) {
+			} else if (benchId.isBlank() && partner_id.isBlank() && name.isBlank() && contact.isBlank() && email.isBlank() 
+					&& min_exp.isBlank() && max_exp.isBlank()  && domain.isBlank() && bench_type.isBlank() && primary_skill.isEmpty() && secondary_skill.isBlank()
+					&& min_budget.isBlank() && max_budget.isBlank()  && salary.isBlank() && !org_name.isBlank() && org_url.isBlank() && current_role.isBlank() && qualification.isBlank() && is_shift_flexibility.isBlank()  && location.isBlank() && working_mode.isBlank() && bench_start_dt.isBlank()) {
 
 				list = bench_repos.getByOrgName(session, org_name);
 				if (list == null || list.isEmpty()) {
@@ -704,9 +816,9 @@ public class BenchServiceImpl implements BenchService {
 					response.setStatus(true);
 					return new ResponseEntity<ResponseDto>(response, HttpStatus.OK);
 				}
-			} else if (benchId.isBlank() && name.isBlank() && contact.isBlank() && email.isBlank() && partner_id.isBlank()
-					&& xp.isBlank() && domain.isBlank() && bench_type.isBlank() && primary_skill.isBlank() && secondary_skill.isBlank()
-					&& budget.isBlank() && salary.isBlank() && org_name.isBlank() && !org_url.isBlank() && current_role.isBlank() && qualification.isBlank() && is_shift_flexibility.isBlank()  && location.isBlank() && working_mode.isBlank()) {
+			} else if (benchId.isBlank() && partner_id.isBlank() && name.isBlank() && contact.isBlank() && email.isBlank() 
+					&& min_exp.isBlank() && max_exp.isBlank() && domain.isBlank() && bench_type.isBlank() && primary_skill.isEmpty() && secondary_skill.isBlank()
+					&& min_budget.isBlank() && max_budget.isBlank()  && salary.isBlank() && org_name.isBlank() && !org_url.isBlank() && current_role.isBlank() && qualification.isBlank() && is_shift_flexibility.isBlank()  && location.isBlank() && working_mode.isBlank() && bench_start_dt.isBlank()) {
 
 				list = bench_repos.getByOrgUrl(session, org_url);
 				if (list == null || list.isEmpty()) {
@@ -720,9 +832,9 @@ public class BenchServiceImpl implements BenchService {
 					response.setStatus(true);
 					return new ResponseEntity<ResponseDto>(response, HttpStatus.OK);
 				}
-			} else if (benchId.isBlank() && name.isBlank() && contact.isBlank() && email.isBlank() && partner_id.isBlank()
-					&& xp.isBlank() && domain.isBlank() && bench_type.isBlank() && primary_skill.isBlank() && secondary_skill.isBlank()
-					&& budget.isBlank() && salary.isBlank() && org_name.isBlank() && org_url.isBlank() && !current_role.isBlank() && qualification.isBlank() && is_shift_flexibility.isBlank()  && location.isBlank() && working_mode.isBlank()) {
+			} else if (benchId.isBlank() && partner_id.isBlank() && name.isBlank() && contact.isBlank() && email.isBlank() 
+					&& min_exp.isBlank() && max_exp.isBlank() && domain.isBlank() && bench_type.isBlank() && primary_skill.isEmpty() && secondary_skill.isBlank()
+					&& min_budget.isBlank() && max_budget.isBlank() && salary.isBlank() && org_name.isBlank() && org_url.isBlank() && !current_role.isBlank() && qualification.isBlank() && is_shift_flexibility.isBlank()  && location.isBlank() && working_mode.isBlank() && bench_start_dt.isBlank()) {
 
 				list = bench_repos.getByCurrentRole(session, current_role);
 				if (list == null || list.isEmpty()) {
@@ -736,9 +848,9 @@ public class BenchServiceImpl implements BenchService {
 					response.setStatus(true);
 					return new ResponseEntity<ResponseDto>(response, HttpStatus.OK);
 				}
-			} else if (benchId.isBlank() && name.isBlank() && contact.isBlank() && email.isBlank() && partner_id.isBlank()
-					&& xp.isBlank() && domain.isBlank() && bench_type.isBlank() && primary_skill.isBlank() && secondary_skill.isBlank()
-					&& budget.isBlank() && salary.isBlank() && org_name.isBlank() && org_url.isBlank() && current_role.isBlank() && !qualification.isBlank() && is_shift_flexibility.isBlank()  && location.isBlank() && working_mode.isBlank()) {
+			} else if (benchId.isBlank() && partner_id.isBlank() && name.isBlank() && contact.isBlank() && email.isBlank() 
+					&& min_exp.isBlank() && max_exp.isBlank() && domain.isBlank() && bench_type.isBlank() && primary_skill.isEmpty() && secondary_skill.isBlank()
+					&& min_budget.isBlank() && max_budget.isBlank() && salary.isBlank() && org_name.isBlank() && org_url.isBlank() && current_role.isBlank() && !qualification.isBlank() && is_shift_flexibility.isBlank()  && location.isBlank() && working_mode.isBlank() && bench_start_dt.isBlank()) {
 
 				list = bench_repos.getByQualification(session, qualification);
 				if (list == null || list.isEmpty()) {
@@ -753,9 +865,9 @@ public class BenchServiceImpl implements BenchService {
 					return new ResponseEntity<ResponseDto>(response, HttpStatus.OK);
 				}	
 
-			}else if (benchId.isBlank() && name.isBlank() && contact.isBlank() && email.isBlank() && partner_id.isBlank()
-					&& xp.isBlank() && domain.isBlank() && bench_type.isBlank() && primary_skill.isBlank() && secondary_skill.isBlank()
-					&& budget.isBlank() && salary.isBlank() && org_name.isBlank() && org_url.isBlank() && current_role.isBlank() && qualification.isBlank() && !is_shift_flexibility.isBlank() && location.isBlank() && working_mode.isBlank()) {
+			}else if (benchId.isBlank() && partner_id.isBlank() && name.isBlank() && contact.isBlank() && email.isBlank() 
+					&& min_exp.isBlank() && max_exp.isBlank() && domain.isBlank() && bench_type.isBlank() && primary_skill.isEmpty() && secondary_skill.isBlank()
+					&& min_budget.isBlank() && max_budget.isBlank() && salary.isBlank() && org_name.isBlank() && org_url.isBlank() && current_role.isBlank() && qualification.isBlank() && !is_shift_flexibility.isBlank() && location.isBlank() && working_mode.isBlank() && bench_start_dt.isBlank()) {
 				long isshiftflexibility = 0;
 				try {
 					isshiftflexibility = Long.parseLong(is_shift_flexibility);
@@ -779,9 +891,9 @@ public class BenchServiceImpl implements BenchService {
 				}	
 
 			}
-			else if (benchId.isBlank() && name.isBlank() && contact.isBlank() && email.isBlank() && partner_id.isBlank()
-					&& xp.isBlank() && domain.isBlank() && bench_type.isBlank() && primary_skill.isBlank() && secondary_skill.isBlank()
-					&& budget.isBlank() && salary.isBlank() && org_name.isBlank() && org_url.isBlank() && current_role.isBlank() && qualification.isBlank() && is_shift_flexibility.isBlank()  && !location.isBlank() && working_mode.isBlank()) {
+			else if (benchId.isBlank() && partner_id.isBlank() && name.isBlank() && contact.isBlank() && email.isBlank() 
+					&& min_exp.isBlank() && max_exp.isBlank() && domain.isBlank() && bench_type.isBlank() && primary_skill.isEmpty() && secondary_skill.isBlank()
+					&& min_budget.isBlank() && max_budget.isBlank() && salary.isBlank() && org_name.isBlank() && org_url.isBlank() && current_role.isBlank() && qualification.isBlank() && is_shift_flexibility.isBlank()  && !location.isBlank() && working_mode.isBlank() && bench_start_dt.isBlank()) {
 
 				list = bench_repos.getByLocation(session, location);
 				if (list == null || list.isEmpty()) {
@@ -796,11 +908,28 @@ public class BenchServiceImpl implements BenchService {
 					return new ResponseEntity<ResponseDto>(response, HttpStatus.OK);
 				}	
 
-			}else if (benchId.isBlank() && name.isBlank() && contact.isBlank() && email.isBlank() && partner_id.isBlank()
-					&& xp.isBlank() && domain.isBlank() && bench_type.isBlank() && primary_skill.isBlank() && secondary_skill.isBlank()
-					&& budget.isBlank() && salary.isBlank() && org_name.isBlank() && org_url.isBlank() && current_role.isBlank() && qualification.isBlank() && is_shift_flexibility.isBlank()  && location.isBlank() && !working_mode.isBlank()) {
+			}else if (benchId.isBlank() && partner_id.isBlank() && name.isBlank() && contact.isBlank() && email.isBlank() 
+					&& min_exp.isBlank() && max_exp.isBlank() && domain.isBlank() && bench_type.isBlank() && primary_skill.isEmpty() && secondary_skill.isBlank()
+					&& min_budget.isBlank() && max_budget.isBlank() && salary.isBlank() && org_name.isBlank() && org_url.isBlank() && current_role.isBlank() && qualification.isBlank() && is_shift_flexibility.isBlank()  && location.isBlank() && !working_mode.isBlank() && bench_start_dt.isBlank()) {
 
 				list = bench_repos.getByWorkingMode(session, working_mode);
+				if (list == null || list.isEmpty()) {
+					response.setMessage("Does not found !");
+					response.setBody(null);
+					response.setStatus(false);
+					return new ResponseEntity<ResponseDto>(response, HttpStatus.OK);
+				} else {
+					response.setMessage("Searched  Bench !");
+					response.setBody(list);
+					response.setStatus(true);
+					return new ResponseEntity<ResponseDto>(response, HttpStatus.OK);
+				}	
+
+			} else if (benchId.isBlank() && partner_id.isBlank() && name.isBlank() && contact.isBlank() && email.isBlank() 
+					&& min_exp.isBlank() && max_exp.isBlank() && domain.isBlank() && bench_type.isBlank() && primary_skill.isEmpty() && secondary_skill.isBlank()
+					&& min_budget.isBlank() && max_budget.isBlank() && salary.isBlank() && org_name.isBlank() && org_url.isBlank() && current_role.isBlank() && qualification.isBlank() && is_shift_flexibility.isBlank()  && location.isBlank() && working_mode.isBlank() && !bench_start_dt.isBlank()) {
+
+				list = bench_repos.getByStartDt(session, bench_start_dt);
 				if (list == null || list.isEmpty()) {
 					response.setMessage("Does not found !");
 					response.setBody(null);
@@ -830,7 +959,7 @@ public class BenchServiceImpl implements BenchService {
 	@Override
 	public ResponseEntity<ResponseDto> fetchAllBenches(HttpSession session, String token) {
 		// TODO Auto-generated method stub
-		msRequestFilter.validateToken(session, token);
+		msRequestFilter.validateToken(session,token);
 		ResponseDto response = new ResponseDto();
      
 		try {
@@ -863,6 +992,7 @@ public class BenchServiceImpl implements BenchService {
 				return new ResponseEntity<ResponseDto>(response, HttpStatus.OK);
 			}
 		} catch (Exception e) {
+			System.out.println(e);
 			response.setMessage("Internal server error !");
 			response.setBody(null);
 			response.setStatus(false);

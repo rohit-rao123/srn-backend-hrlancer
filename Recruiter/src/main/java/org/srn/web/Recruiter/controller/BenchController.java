@@ -28,6 +28,8 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.List;
+
 import org.springframework.core.io.Resource;
 import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
@@ -80,11 +82,14 @@ public class BenchController {
 			@ApiParam(value = "Location", required = false) @RequestParam(required = false, defaultValue = "") String location,
 			@ApiParam(value = "is_shift_flexibility", required = false) @RequestParam(required = false, defaultValue = "") String is_shift_flexibility,
 			@ApiParam(value = "working_mode", required = false) @RequestParam(required = false, defaultValue = "") String working_mode,
+			//@ApiParam(value = "Bench Start Date", required = false) @RequestParam(required = false, defaultValue = "") String bench_start_dt,
+			//@ApiParam(value = "Bench End Date", required = false) @RequestParam(required = false, defaultValue = "") String bench_end_dt,
+			@ApiParam(value = "Notice Period", required = false) @RequestParam(required = false, defaultValue = "") String notice_period,
 			@ApiParam(value = "Browse resume", required = false) @RequestParam(required = false,value ="file") MultipartFile resume) {
 
 		// Call service method to add bench
 		return benchService.addNewBench(session, token,partner_id, name, contact, alternate_contact, email,
-				alternate_email, exp, domain,bench_type, primary_skill, secondary_skill, budget,salary,org_name,org_url,current_role, qualification,is_shift_flexibility,location,working_mode,resume);
+				alternate_email, exp, domain,bench_type, primary_skill, secondary_skill, budget,salary,org_name,org_url,current_role, qualification,is_shift_flexibility,location,working_mode,notice_period,resume);
 	}
 
 	@GetMapping("/search/Bench")
@@ -103,12 +108,14 @@ public class BenchController {
 			//@RequestParam(required = false, defaultValue = "") String alternate_contact,
 			@RequestParam(required = false, defaultValue = "") String email,
 			//@RequestParam(required = false, defaultValue = "") String alternate_email,
-			@RequestParam(required = false, defaultValue = "") String exp,
+			@RequestParam(required = false, defaultValue = "") String min_exp,
+			@RequestParam(required = false, defaultValue = "") String max_exp,
 			@RequestParam(required = false, defaultValue = "") String domain,
 			@RequestParam(required = false, defaultValue = "") String bench_type,
-			@RequestParam(required = false, defaultValue = "") String primary_skill,
+			@RequestParam(required = false, defaultValue = "") List<String> primary_skill,
 			@RequestParam(required = false, defaultValue = "") String secondary_skill,
-			@RequestParam(required = false, defaultValue = "") String budget,
+			@RequestParam(required = false, defaultValue = "") String min_budget,
+			@RequestParam(required = false, defaultValue = "") String max_budget,
 			@RequestParam(required = false, defaultValue = "") String salary,
 			@RequestParam(required = false, defaultValue = "") String org_name,
 			@RequestParam(required = false, defaultValue = "") String org_url,
@@ -116,12 +123,19 @@ public class BenchController {
 			@RequestParam(required = false, defaultValue = "") String qualification,
 			@RequestParam(required = false, defaultValue = "") String is_shift_flexibility,
 			@RequestParam(required = false, defaultValue = "") String location,
-			@RequestParam(required = false, defaultValue = "") String working_mode) {
-
+			@RequestParam(required = false, defaultValue = "") String working_mode,
+			@RequestParam(required = false, defaultValue = "") String bench_start_dt
+		) {
+		//System.out.println("*****************************");
+		//System.out.println(primary_skill);
+		//System.out.println("*****************************");
+		
+		
+		
 		// Call a service method to search for bench resources with the given parameters
 		return benchService.searchBench(session, token, bench_id,partner_id,name, contact,
-				 email, exp, domain, bench_type, primary_skill, secondary_skill, budget,salary,org_name,org_url,
-				current_role, qualification,is_shift_flexibility,location,working_mode);
+				 email, min_exp,max_exp, domain, bench_type, primary_skill, secondary_skill, min_budget,max_budget,salary,org_name,org_url,
+				current_role, qualification,is_shift_flexibility,location,working_mode,bench_start_dt);
 	}
 	
 	

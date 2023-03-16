@@ -107,11 +107,23 @@ public class Bench_dao_impl implements Bench_dao {
 		}
 	}
 
-	public List<Bench> getByExp(HttpSession session, double exp) {
+	public List<Bench> getByMinExp(HttpSession session, double min_exp) {
 		// TODO Auto-generated method stub
-		String query = "select * from bench as b where b.exp =:xp order by bench_id desc";
+		String query = "select * from bench as b where b.exp >=:minxp  order by bench_id desc";
 		try {
-			List<Bench> list = sessionFactory.getCurrentSession().createNativeQuery(query).setParameter("xp", exp)
+			List<Bench> list = sessionFactory.getCurrentSession().createNativeQuery(query).setParameter("minxp", min_exp)
+					.addEntity(Bench.class).getResultList();
+			return list;
+		} catch (Exception e) {
+			return null;
+		}
+	}
+	
+	public List<Bench> getByMaxExp(HttpSession session, double max_exp) {
+		// TODO Auto-generated method stub
+		String query = "select * from bench as b where  b.exp <=:maxxp order by bench_id desc";
+		try {
+			List<Bench> list = sessionFactory.getCurrentSession().createNativeQuery(query).setParameter("maxxp", max_exp)
 					.addEntity(Bench.class).getResultList();
 			return list;
 		} catch (Exception e) {
@@ -166,11 +178,22 @@ public class Bench_dao_impl implements Bench_dao {
 			return null;
 		}
 	}
-	public List<Bench> getByBudget(HttpSession session, double budget) {
+	public List<Bench> getByMinBudget(HttpSession session, double min_budget) {
 		// TODO Auto-generated method stub
-		String query = "select * from bench as b where b.budget =:budget order by bench_id desc";
+		String query = "select * from bench as b where b.budget >=:minbudget order by bench_id desc";
 		try {
-			List<Bench> list = sessionFactory.getCurrentSession().createNativeQuery(query).setParameter("budget", budget)
+			List<Bench> list = sessionFactory.getCurrentSession().createNativeQuery(query).setParameter("minbudget", min_budget)
+					.addEntity(Bench.class).getResultList();
+			return list;
+		} catch (Exception e) {
+			return null;
+		}
+	}
+	public List<Bench> getByMaxBudget(HttpSession session, double max_budget) {
+		// TODO Auto-generated method stub
+		String query = "select * from bench as b where b.budget <=:maxbudget order by bench_id desc";
+		try {
+			List<Bench> list = sessionFactory.getCurrentSession().createNativeQuery(query).setParameter("maxbudget", max_budget)
 					.addEntity(Bench.class).getResultList();
 			return list;
 		} catch (Exception e) {

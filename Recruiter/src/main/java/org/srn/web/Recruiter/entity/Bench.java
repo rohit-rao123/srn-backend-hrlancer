@@ -88,11 +88,11 @@ public class Bench implements Serializable {
 	
 	
 	public enum WorkingMode{
-		WFH, WFO, REMOTE, HYBRID	
-		}
+		WFH, Onside, Remote, Hybrid,Office
+	}
 	
 	@Enumerated(EnumType.STRING)
-	@Column( name ="working_mode",columnDefinition ="ENUM('WFH', 'WFO', 'REMOTE', 'HYBRID')", nullable = false)
+	@Column( name ="working_mode",columnDefinition ="ENUM('WFH', 'ONSIDE', 'Remote', 'Hybrid', 'Office')", nullable = false)
 	private WorkingMode working_mode;
 	
 	@Column(unique = false, nullable = false)
@@ -120,10 +120,15 @@ public class Bench implements Serializable {
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
 	@Column(unique = false, nullable = false)
 	private Date dt;
+	
+	@Column(unique = false, nullable = false)
+	private long notice_period;
+
 
 	@Column(unique = false, nullable = false)
 	private int status;
-
+	
+	
 	
 	public Bench() {
 		super();
@@ -134,7 +139,7 @@ public class Bench implements Serializable {
 			String alternate_email, Double exp, String domain, String bench_type, String primary_skill,
 			String secondary_skill, double budget, double salary, String org_name, String org_url, String current_role,
 			String qualification, String created_by, long is_shift_flexibility, WorkingMode working_mode, String location, String resume, Date bench_start_dt, Date bench_end_dt,
-			String bench_status, Date dt, int status) {
+			String bench_status, Date dt, long notice_period,int status) {
 		super();
 		this.bench_id = bench_id;
 		this.partner_id = partner_id;
@@ -163,6 +168,7 @@ public class Bench implements Serializable {
 		this.bench_end_dt = bench_end_dt;
 		this.bench_status = bench_status;
 		this.dt = dt;
+		this.notice_period=notice_period;
 		this.status = status;
 	}
 
@@ -439,6 +445,18 @@ public class Bench implements Serializable {
 	public void setLocation(String location) {
 		this.location = location;
 	}
+	
+	
+
+
+	public long getNotice_period() {
+		return notice_period;
+	}
+
+
+	public void setNotice_period(long notice_period) {
+		this.notice_period = notice_period;
+	}
 
 
 	@Override
@@ -451,9 +469,12 @@ public class Bench implements Serializable {
 				+ current_role + ", qualification=" + qualification + ", created_by=" + created_by
 				+ ", is_shift_flexibility=" + is_shift_flexibility + ", working_mode=" + working_mode + ", location="
 				+ location + ", resume=" + resume + ", bench_start_dt=" + bench_start_dt + ", bench_end_dt="
-				+ bench_end_dt + ", bench_status=" + bench_status + ", dt=" + dt + ", status=" + status + "]";
+				+ bench_end_dt + ", bench_status=" + bench_status + ", dt=" + dt + ", notice_period=" + notice_period
+				+ ", status=" + status + "]";
 	}
 
+
+	
 
 	
 

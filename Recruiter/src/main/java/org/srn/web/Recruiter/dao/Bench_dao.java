@@ -18,7 +18,9 @@ public interface Bench_dao {
 	public List<Bench> getByContact(HttpSession session, String contact);
 	public List<Bench> getByEmail(HttpSession session, String email);
 	
-	public List<Bench> getByExp(HttpSession session, double exp);
+	public List<Bench> getByMinExp(HttpSession session, double min_exp);
+	
+	public List<Bench> getByMaxExp(HttpSession session, double max_exp);
 	
 	public List<Bench> getByDomain(HttpSession session, String domain);
 	
